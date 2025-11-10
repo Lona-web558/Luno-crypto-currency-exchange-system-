@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luno - Cryptocurrency Exchange</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --luno-blue: #0066FF;
+            --luno-dark: #1a1a2e;
+            --luno-light: #f8f9fa;
+        }
+        
+        body {
+            background-color: var(--luno-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background-color: var(--luno-dark);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            margin: 0 0.5rem;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 2px solid var(--luno-light);
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+        }
+        
+        .crypto-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--luno-light);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .crypto-item:hover {
+            background-color: var(--luno-light);
+        }
+        
+        .crypto-item:last-child {
+            border-bottom: none;
+        }
+        
+        .price-up {
+            color: #28a745;
+        }
+        
+        .price-down {
+            color: #dc3545;
+        }
+        
+        .btn-primary {
+            background-color: var(--luno-blue);
+            border: none;
+            padding: 0.6rem 2rem;
+            border-radius: 8px;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0052cc;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, var(--luno-blue), #0052cc);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+        }
+        
+        .transaction-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--luno-light);
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .tab-content {
+            padding: 2rem 0;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--luno-blue);
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-coins"></i> LUNO</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showPage('dashboard')">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPage('trade')">Trade</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPage('wallet')">Wallet</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPage('history')">History</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page-content">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Market Overview</h5>
+                        </div>
+                        <div class="card-body p-0" id="market-overview"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="balance-card">
+                        <h6 class="mb-3">Total Balance</h6>
+                        <h2 class="mb-0" id="total-balance">$0.00</h2>
+                        <p class="mb-0 mt-2 opacity-75">USD Equivalent</p>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <div class="stat-card">
+                                <div class="stat-value" id="portfolio-change">+0%</div>
+                                <div class="stat-label">24h Change</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trade Page -->
+        <div id="trade-page" class="page-content" style="display:none;">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#buy-tab">Buy</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#sell-tab">Sell</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="buy-tab">
+                                    <form id="buy-form">
+                                        <div class="mb-3">
+                                            <label class="form-label">Select Cryptocurrency</label>
+                                            <select class="form-select" id="buy-crypto">
+                                                <option value="BTC">Bitcoin (BTC)</option>
+                                                <option value="ETH">Ethereum (ETH)</option>
+                                                <option value="XRP">Ripple (XRP)</option>
+                                                <option value="LTC">Litecoin (LTC)</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Amount (USD)</label>
+                                            <input type="number" class="form-control" id="buy-amount" placeholder="0.00" min="0" step="0.01">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">You will receive</label>
+                                            <input type="text" class="form-control" id="buy-receive" readonly>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Buy Now</button>
+                                    </form>
+                                </div>
+                                <div class="tab-pane fade" id="sell-tab">
+                                    <form id="sell-form">
+                                        <div class="mb-3">
+                                            <label class="form-label">Select Cryptocurrency</label>
+                                            <select class="form-select" id="sell-crypto">
+                                                <option value="BTC">Bitcoin (BTC)</option>
+                                                <option value="ETH">Ethereum (ETH)</option>
+                                                <option value="XRP">Ripple (XRP)</option>
+                                                <option value="LTC">Litecoin (LTC)</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Amount (Crypto)</label>
+                                            <input type="number" class="form-control" id="sell-amount" placeholder="0.00" min="0" step="0.00000001">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">You will receive (USD)</label>
+                                            <input type="text" class="form-control" id="sell-receive" readonly>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Sell Now</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Current Prices</h6>
+                        </div>
+                        <div class="card-body p-0" id="current-prices"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Page -->
+        <div id="wallet-page" class="page-content" style="display:none;">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">My Wallet</h5>
+                        </div>
+                        <div class="card-body" id="wallet-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div id="history-page" class="page-content" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Transaction History</h5>
+                </div>
+                <div class="card-body p-0" id="transaction-history"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mock API Data
+        const mockAPI = {
+            prices: {
+                BTC: 45230.50,
+                ETH: 3125.75,
+                XRP: 0.65,
+                LTC: 178.30
+            },
+            changes: {
+                BTC: 2.5,
+                ETH: -1.3,
+                XRP: 5.2,
+                LTC: 0.8
+            },
+            wallet: {
+                BTC: 0.05,
+                ETH: 0.5,
+                XRP: 100,
+                LTC: 2,
+                USD: 10000
+            },
+            transactions: []
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateMarketOverview();
+            updateCurrentPrices();
+            updateWallet();
+            updateTransactionHistory();
+            updateTotalBalance();
+            
+            // Buy form calculation
+            document.getElementById('buy-amount').addEventListener('input', function() {
+                const amount = parseFloat(this.value) || 0;
+                const crypto = document.getElementById('buy-crypto').value;
+                const price = mockAPI.prices[crypto];
+                const receive = (amount / price).toFixed(8);
+                document.getElementById('buy-receive').value = `${receive} ${crypto}`;
+            });
+
+            // Sell form calculation
+            document.getElementById('sell-amount').addEventListener('input', function() {
+                const amount = parseFloat(this.value) || 0;
+                const crypto = document.getElementById('sell-crypto').value;
+                const price = mockAPI.prices[crypto];
+                const receive = (amount * price).toFixed(2);
+                document.getElementById('sell-receive').value = `$${receive}`;
+            });
+
+            // Buy form submit
+            document.getElementById('buy-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const crypto = document.getElementById('buy-crypto').value;
+                const amount = parseFloat(document.getElementById('buy-amount').value);
+                const receive = parseFloat(document.getElementById('buy-receive').value);
+                
+                if (amount > mockAPI.wallet.USD) {
+                    alert('Insufficient USD balance!');
+                    return;
+                }
+                
+                mockAPI.wallet.USD -= amount;
+                mockAPI.wallet[crypto] = (mockAPI.wallet[crypto] || 0) + receive;
+                
+                mockAPI.transactions.unshift({
+                    type: 'buy',
+                    crypto: crypto,
+                    amount: receive,
+                    usd: amount,
+                    date: new Date().toISOString()
+                });
+                
+                alert(`Successfully bought ${receive} ${crypto}`);
+                updateWallet();
+                updateTransactionHistory();
+                updateTotalBalance();
+                this.reset();
+                document.getElementById('buy-receive').value = '';
+            });
+
+            // Sell form submit
+            document.getElementById('sell-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const crypto = document.getElementById('sell-crypto').value;
+                const amount = parseFloat(document.getElementById('sell-amount').value);
+                const receive = parseFloat(document.getElementById('sell-receive').value.replace('$', ''));
+                
+                if (amount > (mockAPI.wallet[crypto] || 0)) {
+                    alert(`Insufficient ${crypto} balance!`);
+                    return;
+                }
+                
+                mockAPI.wallet[crypto] -= amount;
+                mockAPI.wallet.USD += receive;
+                
+                mockAPI.transactions.unshift({
+                    type: 'sell',
+                    crypto: crypto,
+                    amount: amount,
+                    usd: receive,
+                    date: new Date().toISOString()
+                });
+                
+                alert(`Successfully sold ${amount} ${crypto}`);
+                updateWallet();
+                updateTransactionHistory();
+                updateTotalBalance();
+                this.reset();
+                document.getElementById('sell-receive').value = '';
+            });
+        });
+
+        function showPage(page) {
+            document.querySelectorAll('.page-content').forEach(el => el.style.display = 'none');
+            document.getElementById(page + '-page').style.display = 'block';
+            
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function updateMarketOverview() {
+            const container = document.getElementById('market-overview');
+            let html = '';
+            
+            for (const [crypto, price] of Object.entries(mockAPI.prices)) {
+                const change = mockAPI.changes[crypto];
+                const changeClass = change >= 0 ? 'price-up' : 'price-down';
+                const icon = change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                html += `
+                    <div class="crypto-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">${getCryptoName(crypto)}</h6>
+                            <small class="text-muted">${crypto}</small>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="mb-0">$${price.toLocaleString()}</h6>
+                            <small class="${changeClass}">
+                                <i class="fas ${icon}"></i> ${Math.abs(change)}%
+                            </small>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function updateCurrentPrices() {
+            const container = document.getElementById('current-prices');
+            let html = '';
+            
+            for (const [crypto, price] of Object.entries(mockAPI.prices)) {
+                html += `
+                    <div class="crypto-item">
+                        <div class="d-flex justify-content-between">
+                            <span>${crypto}</span>
+                            <strong>$${price.toLocaleString()}</strong>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function updateWallet() {
+            const container = document.getElementById('wallet-content');
+            let html = '<div class="row">';
+            
+            for (const [asset, amount] of Object.entries(mockAPI.wallet)) {
+                const value = asset === 'USD' ? amount : amount * mockAPI.prices[asset];
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>${asset === 'USD' ? 'US Dollar' : getCryptoName(asset)}</h6>
+                                <h4>${amount.toFixed(asset === 'USD' ? 2 : 8)} ${asset}</h4>
+                                <p class="text-muted mb-0">≈ $${value.toFixed(2)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function updateTransactionHistory() {
+            const container = document.getElementById('transaction-history');
+            
+            if (mockAPI.transactions.length === 0) {
+                container.innerHTML = '<div class="p-4 text-center text-muted">No transactions yet</div>';
+                return;
+            }
+            
+            let html = '';
+            mockAPI.transactions.forEach(tx => {
+                const date = new Date(tx.date).toLocaleString();
+                const icon = tx.type === 'buy' ? 'fa-arrow-down' : 'fa-arrow-up';
+                const colorClass = tx.type === 'buy' ? 'text-success' : 'text-danger';
+                
+                html += `
+                    <div class="transaction-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">
+                                    <i class="fas ${icon} ${colorClass}"></i>
+                                    ${tx.type.toUpperCase()} ${tx.crypto}
+                                </h6>
+                                <small class="text-muted">${date}</small>
+                            </div>
+                            <div class="text-end">
+                                <h6 class="mb-0">${tx.amount.toFixed(8)} ${tx.crypto}</h6>
+                                <small class="text-muted">$${tx.usd.toFixed(2)}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateTotalBalance() {
+            let total = mockAPI.wallet.USD;
+            
+            for (const [crypto, amount] of Object.entries(mockAPI.wallet)) {
+                if (crypto !== 'USD') {
+                    total += amount * mockAPI.prices[crypto];
+                }
+            }
+            
+            document.getElementById('total-balance').textContent = `$${total.toFixed(2)}`;
+            
+            // Calculate 24h change (mock)
+            const change = (Math.random() * 10 - 2).toFixed(2);
+            const changeEl = document.getElementById('portfolio-change');
+            changeEl.textContent = `${change >= 0 ? '+' : ''}${change}%`;
+            changeEl.className = `stat-value ${change >= 0 ? 'text-success' : 'text-danger'}`;
+        }
+
+        function getCryptoName(symbol) {
+            const names = {
+                BTC: 'Bitcoin',
+                ETH: 'Ethereum',
+                XRP: 'Ripple',
+                LTC: 'Litecoin'
+            };
+            return names[symbol] || symbol;
+        }
+
+        // Simulate price updates every 5 seconds
+        setInterval(() => {
+            for (const crypto in mockAPI.prices) {
+                const change = (Math.random() - 0.5) * 100;
+                mockAPI.prices[crypto] += change;
+                mockAPI.changes[crypto] = (Math.random() * 10 - 5).toFixed(2);
+            }
+            updateMarketOverview();
+            updateCurrentPrices();
+            updateTotalBalance();
+        }, 5000);
+    </script>
+</body>
+</html>
